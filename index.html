@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Happy Birthday, Dii</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,400..700,0;9..144,400..700,1&family=Caveat:wght@500;600;700&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ambient falling petals + stickers, floats above everything, behind the lightbox -->
+  <div id="petal-field" aria-hidden="true"></div>
+  <canvas id="fx-canvas"></canvas>
+
+  <!-- background music: drop your own mp3 in /audio/theme-song.mp3 -->
+  <audio id="bg-audio" loop preload="none">
+    <source src="audio/theme-song.mp3" type="audio/mpeg">
+  </audio>
+  <button id="sound-toggle" class="sound-toggle" type="button" aria-label="Toggle music">🔈</button>
+
+  <!-- top progress dots + back arrow, always on top of the current slide -->
+  <button id="prev-btn" class="prev-btn" type="button" aria-label="Go back" hidden>‹</button>
+  <div id="progress-dots" class="progress-dots" aria-hidden="true"></div>
+
+  <!-- GATE: shown only if CONTENT.birthday is set AND opened before that date -->
+  <section id="gate" class="gate">
+    <div class="gate-card">
+      <p class="eyebrow">a little something is waiting</p>
+      <h1 class="gate-title">Not yet, patience!</h1>
+      <p class="gate-copy">This one unlocks itself at midnight on her birthday.</p>
+      <div class="countdown" id="countdown">
+        <div class="count-block"><span id="cd-days">00</span><label>days</label></div>
+        <div class="count-block"><span id="cd-hours">00</span><label>hrs</label></div>
+        <div class="count-block"><span id="cd-mins">00</span><label>min</label></div>
+        <div class="count-block"><span id="cd-secs">00</span><label>sec</label></div>
+      </div>
+      <button class="ghost-btn" id="peek-btn" type="button">okay fine, let me peek anyway</button>
+    </div>
+  </section>
+
+  <!-- SLIDE DECK: one full-screen slide visible at a time, tap to move on -->
+  <main id="app">
+
+    <!-- 1. COVER -->
+    <section class="slide" id="slide-cover">
+      <span class="giant-emoji" aria-hidden="true">🎈</span>
+      <div class="cover-inner">
+        <p class="cover-stickers" aria-hidden="true">🎈 🎀 ✨ 🌸 🎂</p>
+        <p class="eyebrow">a surprise for</p>
+        <h1 class="cover-name shine" id="cover-name">Dii</h1>
+        <p class="cover-sub">made with love by <span id="cover-from">your little sister</span></p>
+
+        <button id="open-btn" class="gift-box" type="button" aria-label="Open your surprise">
+          <span class="gift-glow"></span>
+          <span class="ribbon-v"></span>
+          <span class="ribbon-h"></span>
+          <span class="bow">🎀</span>
+          <span class="gift-body"></span>
+        </button>
+        <p class="tap-hint">tap the gift to unwrap</p>
+      </div>
+    </section>
+
+    <!-- 2. WISH -->
+    <section class="slide" id="slide-wish">
+      <span class="giant-emoji" aria-hidden="true">🕯️</span>
+      <p class="eyebrow">first things first</p>
+      <h2 class="reveal-heading">Make a wish, <span class="name-slot">Dii</span> ✨</h2>
+      <button id="candle-btn" class="candle" type="button" aria-label="Blow out the candle">
+        <span class="flame"></span>
+        <span class="stick"></span>
+        <span class="holder"></span>
+      </button>
+      <p class="hint next-hint" id="wish-hint">tap the flame</p>
+    </section>
+
+    <!-- 3. REASONS -->
+    <section class="slide" id="slide-reasons">
+      <span class="giant-emoji" aria-hidden="true">💖</span>
+      <p class="eyebrow">five true things</p>
+      <h2 class="reveal-heading">Reasons I got lucky with a sister like you</h2>
+      <div class="notes" id="notes-grid"></div>
+      <p class="hint next-hint">tap a card to flip it • tap anywhere else for next →</p>
+    </section>
+
+    <!-- 4. GALLERY -->
+    <section class="slide" id="slide-gallery">
+      <span class="giant-emoji" aria-hidden="true">📸</span>
+      <p class="eyebrow">for the record</p>
+      <h2 class="reveal-heading">Some proof we're a menace together</h2>
+      <div class="polaroids" id="polaroid-strip"></div>
+      <p class="hint next-hint">tap a photo to zoom • tap anywhere else for next →</p>
+    </section>
+
+    <!-- 5. LETTER -->
+    <section class="slide" id="slide-letter">
+      <span class="giant-emoji" aria-hidden="true">💌</span>
+      <p class="eyebrow">the part you'll read twice</p>
+      <div class="letter" id="letter-card">
+        <span class="quote-mark">&ldquo;</span>
+        <p class="letter-body" id="letter-body"></p>
+        <p class="letter-sign">— <span class="name-slot-from">your little sister</span> ❤️</p>
+      </div>
+      <p class="hint next-hint">tap anywhere for next →</p>
+    </section>
+
+    <!-- 6. CAKE -->
+    <section class="slide" id="slide-cake">
+      <p class="eyebrow">one more thing</p>
+      <h2 class="reveal-heading">I baked you something 👩‍🍳</h2>
+
+      <div class="cake-scene" id="cake-scene">
+        <div class="bowl-rig" id="bowl-rig">
+          <span class="bowl">🥣</span>
+          <span class="spark s1">✨</span>
+          <span class="spark s2">✨</span>
+          <span class="spark s3">✨</span>
+        </div>
+
+        <div class="cake" id="cake-el" hidden>
+          <div class="candle-on-cake" id="cake-candle">
+            <span class="flame"></span>
+            <span class="cstick"></span>
+          </div>
+          <div class="cake-layer cake-top">
+            <span class="sprinkle sp1"></span>
+            <span class="sprinkle sp2"></span>
+            <span class="sprinkle sp3"></span>
+            <span class="sprinkle sp4"></span>
+          </div>
+          <div class="cake-drip"></div>
+          <div class="cake-layer cake-bottom"></div>
+        </div>
+      </div>
+
+      <p class="hint next-hint" id="cake-hint">tap the bowl to start baking 🔥</p>
+    </section>
+
+    <!-- 7. MESSAGE (step 1 of the finale) -->
+    <section class="slide" id="slide-message">
+      <span class="giant-emoji" aria-hidden="true">🎉</span>
+      <h2 class="reveal-heading shine" id="message-heading">Happy Birthday to my favourite sister! 🎂❤️</h2>
+      <p class="hint next-hint">tap anywhere for the last part →</p>
+    </section>
+
+    <!-- 8. TREE (step 2 of the finale) -->
+    <section class="slide" id="slide-tree">
+      <div class="tree-scene">
+        <div class="tree-trunk"></div>
+        <div class="tree-canopy" id="tree-canopy"></div>
+        <span class="amb-balloon b1" aria-hidden="true">🎈</span>
+        <span class="amb-balloon b2" aria-hidden="true">🎈</span>
+        <span class="amb-balloon b3" aria-hidden="true">🎈</span>
+      </div>
+      <h2 class="reveal-heading shine" id="tree-heading">I love you, <span class="name-slot">Dii</span> 💖</h2>
+      <p class="finale-sub">here's to a year that blooms 🌸<br>love you, always.</p>
+      <button id="replay-btn" class="ghost-btn" type="button">↻ watch it again</button>
+    </section>
+
+  </main>
+
+  <!-- lightbox -->
+  <div id="lightbox" class="lightbox" hidden>
+    <button id="lightbox-close" class="lightbox-close" aria-label="Close">✕</button>
+    <figure>
+      <img id="lightbox-img" src="" alt="">
+      <figcaption id="lightbox-caption"></figcaption>
+    </figure>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Add your own song file here, named exactly:
+
+    theme-song.mp3
+
+Then the 🔈 button on the site will play it on a loop.
